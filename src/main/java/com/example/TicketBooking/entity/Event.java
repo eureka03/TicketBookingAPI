@@ -2,57 +2,75 @@ package com.example.TicketBooking.entity;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 
 import java.time.Instant;
+import java.util.UUID;
 
 
 @Entity
-@Table(name="event")
+@Table(name="events")
 public class Event {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.IDENTITY)
-    private Long eventId;
-    private String eventName;
+    @GeneratedValue(strategy= GenerationType.UUID)
+    @Column(name="eventId")
+    private UUID id;
+
+    @Column(name="eventName")
+    private String name;
+
+    @Column(name="description")
     private String description;
+
+    @Column(name="venue")
     private String venue;
-    private int eventCapacity;
+
+    @Min(value=1, message="Capacity must be at least 1")
+    @Column(name="totalCapacity")
+    private int totalCapacity;
+
+    @Column(name="availableTickets")
     private int availableTickets;
+
+    @Column(name="startsAt")
     private Instant startsAt;
+
+
+    @Column(name="offlineTicketSold")
+    private int offlineTicketsSold;
+
+    @Column(name="createdAt")
+    private Instant createdAt;
 
     public Event(){
 
     }
 
-    public Event(String eventName , Long eventId ,int availableTickets, int eventCapacity , Instant startsAt ,String venue, String description){
-        this.eventName = eventName;
-        this.availableTickets = availableTickets;
+    public Event(String name , int totalCapacity , Instant startsAt ,String venue, String description ){
+        this.name = name;
         this.description = description;
         this.venue = venue;
-        this.eventId = eventId;
-        this.eventCapacity = eventCapacity;
+        this.totalCapacity = totalCapacity;
         this.startsAt = startsAt;
     }
 
     public void setEventName(String eventName){
-        this.eventName = eventName;
+        this.name = eventName;
     }
     public String getEventName(){
-        return eventName;
+        return name;
     }
 
-    public void setEventId(Long eventId){
-        this.eventId = eventId;
-    }
-    public Long getEventId(){
-        return eventId;
+    public UUID getId(){
+        return id;
     }
 
-    public void setEventCapacity(int eventCapacity){
-        this.eventCapacity = eventCapacity;
+    public void setTotalCapacity(int eventCapacity){
+        this.totalCapacity = eventCapacity;
     }
-    public int getEventCapacity(){
-        return eventCapacity;
+    public int getTotalCapacity(){
+        return totalCapacity;
     }
 
     public void setStartsAt(Instant startsAt){
@@ -62,9 +80,6 @@ public class Event {
         return startsAt;
     }
 
-    public void setAvailableTickets(int availableTickets){
-        this.availableTickets = availableTickets;
-    }
     public int getAvailableTickets(){
         return availableTickets;
     }
@@ -83,4 +98,26 @@ public class Event {
         return description;
     }
 
+    public void setOfflineTicketSold(int offlineTicketsSold){
+        if(offlineTicketsSold < 0 || offlineTicketsSold >totalCapacity){
+            throw new IllegalArgumentException("Offline tickets must be between 0 and total capacity");
+        }
+
+        this.offlineTicketsSold = offlineTicketsSold;
+    }
+    public int getOfflineTicketSold(){
+
+        return offlineTicketsSold;
+    }
+
+    public Instant getCreatedAt(){
+        return createdAt;
+    }
+
+    @PrePersist
+    protected void onCreate(){
+        this.availableTickets = this.totalCapacity - offlineTicketsSold;
+        this.createdAt = Instant.now();
+
+    }
 }
