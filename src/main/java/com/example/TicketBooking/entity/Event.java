@@ -55,10 +55,10 @@ public class Event {
         this.startsAt = startsAt;
     }
 
-    public void setEventName(String eventName){
-        this.name = eventName;
+    public void setName(String namee){
+        this.name = name;
     }
-    public String getEventName(){
+    public String getName(){
         return name;
     }
 
