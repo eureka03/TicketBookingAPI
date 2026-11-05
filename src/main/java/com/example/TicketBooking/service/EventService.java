@@ -7,6 +7,7 @@ import com.example.TicketBooking.repository.EventRepository;
 import org.springframework.stereotype.Service;
 
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,11 +30,7 @@ public class EventService {
         newEvent.setOfflineTicketSold(eventRequest.getOfflineTicketsSold());
         newEvent.setStartsAt(eventRequest.getStartAt());
         Event savedEvent = eventRepository.save(newEvent);
-
-
         return mapToResponse(savedEvent);
-
-
     }
 
     public List<EventResponse> getAllEvents(){
@@ -49,6 +46,17 @@ public class EventService {
             return allEvents;
 
     }
+    public List<EventResponse> getUpcomingEvents() {
+        List<Event> events = eventRepository.findByStartsAtAfter(Instant.now());
+        List<EventResponse> responseList = new ArrayList<>();
+
+        for(Event e:events){
+            EventResponse eventResponse = mapToResponse(e);
+            responseList.add(eventResponse);
+
+        }
+        return responseList;
+    }
 
     private EventResponse mapToResponse(Event e){
         EventResponse eventResponse = new EventResponse();
@@ -56,7 +64,6 @@ public class EventService {
         eventResponse.setAvailableTickets(e.getAvailableTickets());
         eventResponse.setEventId(e.getId());
         eventResponse.setVenue(e.getVenue());
-
         return eventResponse;
     }
 }
